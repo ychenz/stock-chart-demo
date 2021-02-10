@@ -178,7 +178,7 @@ class LineChart extends React.PureComponent<LineChartProps, LineChartState> {
     const dataList1 = timeSeriesDataLists[0];
 
     const endTimestamp = dataList1[0].timestamp;
-    const startTimestamp = dataList1[timeSeriesDataLists.length -1].timestamp;
+    const startTimestamp = dataList1[dataList1.length -1].timestamp;
     const duration = endTimestamp - startTimestamp;
 
     // we label X in the middle, so margin 1/2 of the in-between distance to the start and end, distance between labels
@@ -201,7 +201,8 @@ class LineChart extends React.PureComponent<LineChartProps, LineChartState> {
     let maxLabel = Math.ceil(maxValue / 100) * 100; // round max up to nearest 100
     let minLabel = Math.floor(minValue / 100) * 100; // round min down to nearest 100
 
-    if (maxValue < 100) {
+    // Zoom in when difference between max and min value is small
+    if (maxValue - minValue < 100) {
       maxLabel = Math.ceil(maxValue / 10) * 10; // round max up to nearest 10
       minLabel = Math.floor(minValue / 10) * 10; // round min down to nearest 10
     }

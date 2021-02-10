@@ -82,7 +82,7 @@ export const XLabelsText = styled.div`
 `;
 
 // columns contain data points. Points lights up if user hover on columns
-export const Column = styled.div<{ count: number;isActive: boolean|null }>`
+export const Column = styled.div<{ count: number; isActive: boolean|null }>`
   position: relative;
   width: ${({ count }) => `calc(100%/${count})`};
   cursor: pointer;
