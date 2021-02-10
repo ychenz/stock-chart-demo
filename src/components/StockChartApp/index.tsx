@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import moment from "moment";
 
 import LineChart from "src/components/LineChart";
@@ -95,7 +95,6 @@ const filterStockDataByDateRange = (stockDataList: TimeSeriesData[], dateRange: 
 export function StockChartApp(): React.ReactElement {
   const [stockData, setStockData] = useState<TimeSeriesData[]>([]);
   const [dateRange, setDateRange] = useState<DateRanges>(DateRanges.TenYears);
-  const prevDateRange = useRef(dateRange);
 
   useEffect(() => {
     async function asyncExecutor(): Promise<TimeSeriesData[]|undefined> {
@@ -131,7 +130,6 @@ export function StockChartApp(): React.ReactElement {
       }));
     }
 
-    console.log(prevDateRange);
     // Fetch 1 day interval data for longer date range
     asyncExecutor().then(res => res && setStockData(res));
   }, [dateRange]);
