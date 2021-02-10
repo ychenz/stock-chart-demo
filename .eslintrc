@@ -33,7 +33,6 @@
         "paths": ["."]
       }
     },
-    // TODO: learn what this does
     "import/parsers": {
       "@typescript-eslint/parser": [".ts", ".tsx"]
     }
@@ -69,7 +68,8 @@
       }
     ],
 
-    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+    // Note .ts and .tsx must be added here to avoid build error during Vercel deployment
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
     "react/prop-types": 0,
 
     // React hook rules required in docs: https://reactjs.org/docs/hooks-rules.html

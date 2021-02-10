@@ -29,25 +29,25 @@ interface FMPStockDataDaily {
   }[];
 }
 
-interface FMPCompanyProfileData {
-  symbol: string;  // date in format YYYY-MM-DD HH:mm:ss
-  price: number;
-  companyName: string; // Apple Inc
-  beta: number;
-  volAvg: number;
-  mktCap: string; // "1.37587904E12"
-  lastDiv: number;
-  range: string;
-  changes:  number;
-  changesPercentage: string; // "(+0.23)"
-  exchange: string; // "Nasdaq Global Select"
-  industry: string; // "Computer Hardware"
-  website: string; // "http://www.apple.com"
-  description: string;
-  ceo: string;
-  sector: string; // "Technology"
-  image: string; // "https://financialmodelingprep.com/images-New-jpg/AAPL.jpg"
-}
+// interface FMPCompanyProfileData {
+//   symbol: string;  // date in format YYYY-MM-DD HH:mm:ss
+//   price: number;
+//   companyName: string; // Apple Inc
+//   beta: number;
+//   volAvg: number;
+//   mktCap: string; // "1.37587904E12"
+//   lastDiv: number;
+//   range: string;
+//   changes:  number;
+//   changesPercentage: string; // "(+0.23)"
+//   exchange: string; // "Nasdaq Global Select"
+//   industry: string; // "Computer Hardware"
+//   website: string; // "http://www.apple.com"
+//   description: string;
+//   ceo: string;
+//   sector: string; // "Technology"
+//   image: string; // "https://financialmodelingprep.com/images-New-jpg/AAPL.jpg"
+// }
 
 const getReducedStockData = (stockDataList: TimeSeriesData[], factor: number): TimeSeriesData[] => (
   // Retain 1 entry for every 7
