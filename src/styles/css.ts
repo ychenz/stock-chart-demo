@@ -35,6 +35,7 @@ export const cssVariables = {
   largeFontSize: "16px",
   mediumFontSize: "14px",
   smallFontSize: "12px",
+  xSmallFontSize: "8px",
 
   paragraphFontSize: "20px",
   paragraphLineHeight: "32px",

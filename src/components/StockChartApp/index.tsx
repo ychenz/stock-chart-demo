@@ -3,51 +3,17 @@ import moment from "moment";
 
 import LineChart from "src/components/LineChart";
 import { TimeSeriesData } from "src/components/LineChart/types";
-import { fetcher, HttpResponse } from "src/services/request";
+import { Loader } from "src/components/Loader";
+
+import { round } from "src/services/mathUtils";
+import { fetchCompanyProfile, fetchShortTermStockData, fetchStockData } from "src/services/FMPRequests";
+import ArrowDownIcon from "src/static/images/ArrowDown.svg";
+import ArrowUpIcon from "src/static/images/ArrowUp.svg";
 
 import * as S from "./styles";
+import { FMPCompanyProfileData } from "./types";
 import DateRangeSelector from "../DateRangeSelector";
 import { DateRanges } from "../DateRangeSelector/types";
-
-// const FMP_API_KEY = "68ea4a477785266e41b4ec5478fc6a1d";
-const FMP_API_KEY = "demo";
-
-interface FMPStockData {
-  date: string;  // date in format YYYY-MM-DD HH:mm:ss
-  open: number;
-  low: number;
-  high: number;
-  close: number;
-  volume: number;
-}
-
-interface FMPStockDataDaily {
-  symbol: string;
-  historical: {
-    date: string; // e.g: "2020-08-14"
-    close: number;
-  }[];
-}
-
-// interface FMPCompanyProfileData {
-//   symbol: string;  // date in format YYYY-MM-DD HH:mm:ss
-//   price: number;
-//   companyName: string; // Apple Inc
-//   beta: number;
-//   volAvg: number;
-//   mktCap: string; // "1.37587904E12"
-//   lastDiv: number;
-//   range: string;
-//   changes:  number;
-//   changesPercentage: string; // "(+0.23)"
-//   exchange: string; // "Nasdaq Global Select"
-//   industry: string; // "Computer Hardware"
-//   website: string; // "http://www.apple.com"
-//   description: string;
-//   ceo: string;
-//   sector: string; // "Technology"
-//   image: string; // "https://financialmodelingprep.com/images-New-jpg/AAPL.jpg"
-// }
 
 const getReducedStockData = (stockDataList: TimeSeriesData[], factor: number): TimeSeriesData[] => (
   // Retain 1 entry for every 7
@@ -94,59 +60,74 @@ const filterStockDataByDateRange = (stockDataList: TimeSeriesData[], dateRange: 
 
 export function StockChartApp(): React.ReactElement {
   const [stockData, setStockData] = useState<TimeSeriesData[]>([]);
+  const [shortTermStockData, setShortTermStockData] = useState<TimeSeriesData[]>([]);
+  const [companyData, setCompanyData] = useState<FMPCompanyProfileData>();
   const [dateRange, setDateRange] = useState<DateRanges>(DateRanges.TenYears);
 
   useEffect(() => {
-    async function asyncExecutor(): Promise<TimeSeriesData[]|undefined> {
-      // Fetch 30 min interval data for shorter date range: 5D, 1M
-      if (dateRange === DateRanges.FiveDays || dateRange === DateRanges.OneMonth) {
-        const stockDataRes: HttpResponse<FMPStockData[]> = await fetcher<FMPStockData[]>({
-          url: "https://financialmodelingprep.com/api/v3/historical-chart/30min/AAPL",
-          method: "GET",
-          queryParams: {
-            apikey: FMP_API_KEY
-          }
-        });
-
-        return stockDataRes.parsedBody && stockDataRes.parsedBody.map(entry => ({
-          timestamp: moment(entry.date, "YYYY-MM-DD HH:mm:ss").valueOf(),
-          value: entry.close
-        }));
-      }
-
-      const stockDataRes: HttpResponse<FMPStockDataDaily> = await fetcher<FMPStockDataDaily>({
-        url: "https://financialmodelingprep.com/api/v3/historical-price-full/AAPL",
-        method: "GET",
-        queryParams: {
-          apikey: FMP_API_KEY,
-          serietype: "line"
-        }
-      });
-
-      // Taking max of 10 years of data
-      return stockDataRes.parsedBody && stockDataRes.parsedBody.historical.slice(0, 3650).map(entry => ({
-        timestamp: moment(entry.date, "YYYY-MM-DD").valueOf(),
-        value: entry.close
-      }));
-    }
-
-    // Fetch 1 day interval data for longer date range
-    asyncExecutor().then(res => res && setStockData(res));
-  }, [dateRange]);
+    fetchStockData().then(res => res && setStockData(res));
+    fetchShortTermStockData().then(res => res && setShortTermStockData(res));
+    fetchCompanyProfile().then(res => res && setCompanyData(res));
+  }, []);
 
   const onDateRangeChange = (newDateRange: DateRanges) => {
     setDateRange(newDateRange);
   };
 
+  const dataToUse = (
+    dateRange === DateRanges.FiveDays || dateRange === DateRanges.OneMonth
+  ) ? shortTermStockData : stockData;
+
+  const renderCompanyProfile = (companyProfile: FMPCompanyProfileData) => {
+    const { companyName, symbol, price, changes } = companyProfile;
+
+    const currentDateTime = moment().format("MMM Do");
+    const previousPrice = price - changes;
+    const currentPrice = price;
+    const priceChange = round(currentPrice - previousPrice, 2);
+    const priceChangePercentage =round((currentPrice - previousPrice) * 100 / previousPrice, 2);
+
+    return (
+      <div>
+        <S.HorizontalContainer>
+          <S.CompanyNameText>{companyName}</S.CompanyNameText>
+          <S.Ticker>{symbol}</S.Ticker>
+        </S.HorizontalContainer>
+        <S.Datetime>{currentDateTime}</S.Datetime>
+        <S.HorizontalContainer>
+          <S.CurrentPriceText>{`$${currentPrice}`}</S.CurrentPriceText>
+          <S.PriceChange isNegative={priceChange < 0}>
+            {priceChange > 0 ? `+${priceChange}` : priceChange}
+          </S.PriceChange>
+          {priceChangePercentage < 0 ? (
+            <S.ArrowIconContainer>
+              <img src={ArrowDownIcon} alt="arrow-down" />
+            </S.ArrowIconContainer>
+          ) : (
+            <S.ArrowIconContainer>
+              <img src={ArrowUpIcon} alt="arrow-up" />
+            </S.ArrowIconContainer>
+          )}
+          <S.PriceChange isNegative={priceChangePercentage < 0}>{`${priceChangePercentage}%`}</S.PriceChange>
+        </S.HorizontalContainer>
+      </div>
+    );
+  };
+
   return (
     <S.Root>
-      {stockData.length > 0 && (
+      {(stockData.length === 0 || !companyData) && (
+        <Loader />
+      )}
+
+      {stockData.length > 0 && companyData && (
         <>
+          {renderCompanyProfile(companyData)}
           <S.DateSelectorContainer>
             <DateRangeSelector dateRange={dateRange} onRangeSelected={onDateRangeChange} />
           </S.DateSelectorContainer>
           <LineChart
-            timeSeriesDataLists={[filterStockDataByDateRange(stockData, dateRange).reverse()]}
+            timeSeriesDataLists={[filterStockDataByDateRange(dataToUse, dateRange).reverse()]}
           />
         </>
       )}
