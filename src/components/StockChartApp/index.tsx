@@ -99,7 +99,7 @@ export function StockChartApp(): React.ReactElement {
           <S.PriceChange isNegative={priceChange < 0}>
             {priceChange > 0 ? `+${priceChange}` : priceChange}
           </S.PriceChange>
-          {priceChangePercentage < 0 ? (
+          {priceChangePercentage <= 0 ? (
             <S.ArrowIconContainer>
               <img src={ArrowDownIcon} alt="arrow-down" />
             </S.ArrowIconContainer>
