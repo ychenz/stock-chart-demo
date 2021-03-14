@@ -3,31 +3,32 @@ import moment from "moment";
 import { round } from "src/services/mathUtils";
 import ArrowUpIcon from "src/static/images/ArrowUp.svg";
 import ArrowDownIcon from "src/static/images/ArrowDown.svg";
-import { X_LABEL_COUNT, Y_LABEL_COUNT, CHART_HEIGHT, diagramColors } from "./constants";
+import { CHART_HEIGHT, diagramColors, X_LABEL_COUNT, Y_LABEL_COUNT } from "./constants";
 import LineChartGraph from "./LineChartGraph";
 
 import {
-  Root,
-  LineChartFrame,
-  FrameBackgroundGridLine,
-  LineChartGraphContainer,
-  YLabelsContainer,
-  YLabelsText,
-  XLabelContainer,
-  XLabelsText,
-  ColumnsContainer,
+  ArrowIconContainer,
   Column,
+  ColumnsContainer,
   DataPoint,
+  FrameBackgroundGridLine,
+  LineChartFrame,
+  LineChartGraphContainer,
+  Root,
   TooltipContainer,
-  TooltipMultiColorIndicator,
-  TooltipEntryContainer,
-  TooltipValueText,
   TooltipDateText,
+  TooltipEntryContainer,
+  TooltipMultiColorIndicator,
   TooltipPercentageChange,
   TooltipPercentageChangeIcon,
-  ArrowIconContainer
+  TooltipValueText,
+  XLabelContainer,
+  XLabelsText,
+  YLabelsContainer,
+  YLabelsText
 } from "./styles";
 import { TimeSeriesData } from "./types";
+import { DateRanges } from "../DateRangeSelector/types";
 
 interface TooltipsConfig {
   x: number;
@@ -47,6 +48,7 @@ interface LineChartState {
 }
 
 interface LineChartProps {
+  dateRange: DateRanges;
   isTimeSeries?: boolean;
   timeSeriesDataLists: TimeSeriesData[][];
 }
@@ -187,7 +189,7 @@ class LineChart extends React.PureComponent<LineChartProps, LineChartState> {
 
     // From left (earlier) to right (later)
     return [...Array(X_LABEL_COUNT).keys()].map(
-      i => moment(endTimestamp - timeSegment - i * 2 * timeSegment).format("M/D/YYYY H:mm")
+      i => moment(endTimestamp - timeSegment - i * 2 * timeSegment).format("MMM D, YYYY")
     );
   }
 
@@ -240,7 +242,7 @@ class LineChart extends React.PureComponent<LineChartProps, LineChartState> {
   }
 
   render(): ReactElement {
-    const { timeSeriesDataLists } = this.props;
+    const { timeSeriesDataLists, dateRange } = this.props;
     const { tooltipData } = this.state;
     const { yLabels } = this;
 
@@ -350,7 +352,14 @@ class LineChart extends React.PureComponent<LineChartProps, LineChartState> {
                         </TooltipValueText>
                       )
                     }
-                    <TooltipDateText>{moment(stockData.timestamp).format("MMM Do YYYY, H:mm")}</TooltipDateText>
+                    <TooltipDateText>
+                      {
+                        // The data only contains precise timestamp when date range is small
+                        dateRange === DateRanges.FiveDays || dateRange === DateRanges.OneMonth ? (
+                          moment(stockData.timestamp).format("MMM Do YYYY, H:mm")
+                        ) : moment(stockData.timestamp).format("MMM Do YYYY")
+                      }
+                    </TooltipDateText>
                   </TooltipEntryContainer>
 
                   {tooltipData.endData && tooltipData.config.endColumnIndex && (

@@ -127,6 +127,7 @@ export function StockChartApp(): React.ReactElement {
             <DateRangeSelector dateRange={dateRange} onRangeSelected={onDateRangeChange} />
           </S.DateSelectorContainer>
           <LineChart
+            dateRange={dateRange}
             timeSeriesDataLists={[filterStockDataByDateRange(dataToUse, dateRange).reverse()]}
           />
         </>
