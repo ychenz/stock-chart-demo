@@ -3,10 +3,10 @@ import { TimeSeriesData } from "../components/LineChart/types";
 import { fetcher, HttpResponse } from "./request";
 import { FMPCompanyProfileData, FMPStockData, FMPStockDataDaily } from "../components/StockChartApp/types";
 
-const FMP_API_KEY = "demo";
+const FMP_API_KEY = process.env.REACT_APP_FMP_API_KEY as string;
 
 export async function fetchStockData(): Promise<TimeSeriesData[]|undefined> {
-      // Fetch AAPL stock data for longer period
+  // Fetch AAPL stock data for longer period
   const stockDataRes: HttpResponse<FMPStockDataDaily> = await fetcher<FMPStockDataDaily>({
     url: "https://financialmodelingprep.com/api/v3/historical-price-full/AAPL",
     method: "GET",
