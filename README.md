@@ -4,4 +4,4 @@
 
 A line graph showing latest AAPL stock price and history using data fetched from [FMP APIs](https://financialmodelingprep.com/developer/docs/#Company-Profile)
 
-This is implemented using React and CSS3 without any UI frameworks. A live demo can be found on [my website](https://www.yuchenz.net/profile/analytics)
+This is implemented using React and CSS3 without any UI frameworks. A live demo can be found on [my website](https://about.yuchenz.net/demo/analytics)
