@@ -32,24 +32,23 @@ import { DateRanges } from "../DateRangeSelector/types";
 
 interface TooltipsConfig {
   x: number;
-  y: number|null;
+  y: number | null;
   isInverted: boolean;
   mouseIsDown: boolean;
   startColumnIndex: number;
-  endColumnIndex: number|null;
+  endColumnIndex: number | null;
 }
 
 interface LineChartState {
   tooltipData: {
     startData: TimeSeriesData[]; // columns data, length is the same as timeSeriesDataLists, contains only data for that index
-    endData: TimeSeriesData[]|null; // Same as above, should have same length as timeSeriesDataLists
+    endData: TimeSeriesData[] | null; // Same as above, should have same length as timeSeriesDataLists
     config: TooltipsConfig;
-  }|null;
+  } | null;
 }
 
 interface LineChartProps {
   dateRange: DateRanges;
-  isTimeSeries?: boolean;
   timeSeriesDataLists: TimeSeriesData[][];
 }
 
@@ -143,7 +142,7 @@ class LineChart extends React.PureComponent<LineChartProps, LineChartState> {
     });
   }
 
-  handleColumnMouseDown(columnData: TimeSeriesData[], columnIndex: number): void{
+  handleColumnMouseDown(columnData: TimeSeriesData[], columnIndex: number): void {
     this.setState(prevState => prevState.tooltipData && ({
       tooltipData: {
         startData: prevState.tooltipData.startData,
@@ -180,7 +179,7 @@ class LineChart extends React.PureComponent<LineChartProps, LineChartState> {
     const dataList1 = timeSeriesDataLists[0];
 
     const endTimestamp = dataList1[0].timestamp;
-    const startTimestamp = dataList1[dataList1.length -1].timestamp;
+    const startTimestamp = dataList1[dataList1.length - 1].timestamp;
     const duration = endTimestamp - startTimestamp;
 
     // we label X in the middle, so margin 1/2 of the in-between distance to the start and end, distance between labels
@@ -334,9 +333,9 @@ class LineChart extends React.PureComponent<LineChartProps, LineChartState> {
                   <TooltipEntryContainer>
                     {timeSeriesDataLists.length > 1 && (
                       <TooltipMultiColorIndicator
-                        style={{  background: diagramColors[i % diagramColors.length] }}
+                        style={{ background: diagramColors[i % diagramColors.length] }}
                       />
-                    ) }
+                    )}
 
                     {tooltipData.startData && !tooltipData.config.mouseIsDown && (
                       <TooltipValueText>
@@ -399,10 +398,10 @@ class LineChart extends React.PureComponent<LineChartProps, LineChartState> {
                         {
                           tooltipData.config.startColumnIndex <= tooltipData.config.endColumnIndex ? (
                             `(${round((
-                              tooltipData.endData[i].value - stockData.value) * 100 /stockData.value,2
+                              tooltipData.endData[i].value - stockData.value) * 100 / stockData.value, 2
                             )}%)`
                           ) : `(${round((
-                            stockData.value - tooltipData.endData[i].value) * 100 /tooltipData.endData[i].value,2
+                            stockData.value - tooltipData.endData[i].value) * 100 / tooltipData.endData[i].value, 2
                           )}%)`
                         }
                       </div>
