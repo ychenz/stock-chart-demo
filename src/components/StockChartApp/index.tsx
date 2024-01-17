@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import moment from "moment";
 
 import LineChart from "src/components/LineChart";
@@ -6,9 +6,9 @@ import { TimeSeriesData } from "src/components/LineChart/types";
 import { Loader } from "src/components/Loader";
 
 import { round } from "src/services/mathUtils";
-import { fetchCompanyProfile, fetchShortTermStockData, fetchStockData } from "src/services/FMPRequests";
 import ArrowDownIcon from "src/static/images/ArrowDown.svg";
 import ArrowUpIcon from "src/static/images/ArrowUp.svg";
+import { useCompanyProfile, useShortTermStockData, useStockData } from "src/hooks";
 
 import * as S from "./styles";
 import { FMPCompanyProfileData } from "./types";
@@ -17,58 +17,52 @@ import { DateRanges } from "../DateRangeSelector/types";
 
 const getReducedStockData = (stockDataList: TimeSeriesData[], factor: number): TimeSeriesData[] => (
   // Retain 1 entry for every 7
-  stockDataList.filter((data, i ) => i % factor === 0)
+  stockDataList.filter((data, i) => i % factor === 0)
 );
 
 const filterStockDataByDateRange = (stockDataList: TimeSeriesData[], dateRange: DateRanges): TimeSeriesData[] => {
-    if (stockDataList.length === 0) {
-      return [];
-    }
+  if (stockDataList.length === 0) {
+    return [];
+  }
 
-    const latestTimestamp = stockDataList[0].timestamp;
-    let msToSubtract: number;
-    const msInADay = 86400000;
-    let filteredStockData = stockDataList;
+  const latestTimestamp = stockDataList[0].timestamp;
+  let msToSubtract: number;
+  const msInADay = 86400000;
+  let filteredStockData = stockDataList;
 
-    switch (dateRange) {
-      case DateRanges.FiveDays:
-        msToSubtract = 5 * msInADay;
-        break;
-      case DateRanges.OneMonth:
-        msToSubtract = 30 * msInADay;
-        break;
-      case DateRanges.SixMonths:
-        msToSubtract = 180 * msInADay;
-        break;
-      case DateRanges.OneYear:
-        msToSubtract = 365 * msInADay;
-        break;
-      case DateRanges.FiveYears:
-        msToSubtract = 5 * 365 * msInADay;
-        // Getting weekly data
-        filteredStockData = getReducedStockData(stockDataList, 7);
-        break;
-      case DateRanges.TenYears:
-        msToSubtract = 10 * 365 * msInADay;
-        filteredStockData = getReducedStockData(stockDataList, 7);
-        break;
-      default:
-    }
+  switch (dateRange) {
+    case DateRanges.FiveDays:
+      msToSubtract = 5 * msInADay;
+      break;
+    case DateRanges.OneMonth:
+      msToSubtract = 30 * msInADay;
+      break;
+    case DateRanges.SixMonths:
+      msToSubtract = 180 * msInADay;
+      break;
+    case DateRanges.OneYear:
+      msToSubtract = 365 * msInADay;
+      break;
+    case DateRanges.FiveYears:
+      msToSubtract = 5 * 365 * msInADay;
+      // Getting weekly data
+      filteredStockData = getReducedStockData(stockDataList, 7);
+      break;
+    case DateRanges.TenYears:
+      msToSubtract = 10 * 365 * msInADay;
+      filteredStockData = getReducedStockData(stockDataList, 7);
+      break;
+    default:
+  }
 
-    return filteredStockData.filter(data => data.timestamp > latestTimestamp - msToSubtract);
-  };
+  return filteredStockData.filter(data => data.timestamp > latestTimestamp - msToSubtract);
+};
 
 export function StockChartApp(): React.ReactElement {
-  const [stockData, setStockData] = useState<TimeSeriesData[]>([]);
-  const [shortTermStockData, setShortTermStockData] = useState<TimeSeriesData[]>([]);
-  const [companyData, setCompanyData] = useState<FMPCompanyProfileData>();
+  const stockData = useStockData();
+  const shortTermStockData = useShortTermStockData();
+  const companyData = useCompanyProfile();
   const [dateRange, setDateRange] = useState<DateRanges>(DateRanges.TenYears);
-
-  useEffect(() => {
-    fetchStockData().then(res => res && setStockData(res));
-    fetchShortTermStockData().then(res => res && setShortTermStockData(res));
-    fetchCompanyProfile().then(res => res && setCompanyData(res));
-  }, []);
 
   const onDateRangeChange = (newDateRange: DateRanges) => {
     setDateRange(newDateRange);
@@ -85,7 +79,7 @@ export function StockChartApp(): React.ReactElement {
     const previousPrice = price - changes;
     const currentPrice = price;
     const priceChange = round(currentPrice - previousPrice, 2);
-    const priceChangePercentage =round((currentPrice - previousPrice) * 100 / previousPrice, 2);
+    const priceChangePercentage = round((currentPrice - previousPrice) * 100 / previousPrice, 2);
 
     return (
       <div>

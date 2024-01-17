@@ -81,6 +81,7 @@ class LineChart extends React.PureComponent<LineChartProps, LineChartState> {
 
   handleColumnMouseEnter(event: React.MouseEvent<HTMLDivElement>, columnData: TimeSeriesData[], columnIndex: number): void {
     const { tooltipData } = this.state;
+    console.log(tooltipData);
 
     const target = event.target as HTMLDivElement;
     const targetBoundingClientRect = target.getBoundingClientRect();
