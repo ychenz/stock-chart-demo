@@ -81,7 +81,6 @@ class LineChart extends React.PureComponent<LineChartProps, LineChartState> {
 
   handleColumnMouseEnter(event: React.MouseEvent<HTMLDivElement>, columnData: TimeSeriesData[], columnIndex: number): void {
     const { tooltipData } = this.state;
-    console.log(tooltipData);
 
     const target = event.target as HTMLDivElement;
     const targetBoundingClientRect = target.getBoundingClientRect();
@@ -241,6 +240,31 @@ class LineChart extends React.PureComponent<LineChartProps, LineChartState> {
     );
   }
 
+  renderTooltipEndPrice = (tooltipEndData: TimeSeriesData | null, mouseIsDown: boolean): React.ReactNode => {
+    const { dateRange } = this.props;
+
+    if (tooltipEndData && mouseIsDown) {
+      // Showing the start of the date range & price
+      return (
+        <TooltipEntryContainer>
+          <TooltipValueText>
+            {`$${round(tooltipEndData.value, 2)}`}
+          </TooltipValueText>
+          <TooltipDateText>
+            {
+              // The data only contains precise timestamp when date range is small
+              dateRange === DateRanges.FiveDays || dateRange === DateRanges.OneMonth ? (
+                moment(tooltipEndData.timestamp).format("MMM Do YYYY, H:mm")
+              ) : moment(tooltipEndData.timestamp).format("MMM Do YYYY")
+            }
+          </TooltipDateText>
+        </TooltipEntryContainer>
+      );
+    }
+
+    return null;
+  }
+
   render(): ReactElement {
     const { timeSeriesDataLists, dateRange } = this.props;
     const { tooltipData } = this.state;
@@ -330,28 +354,21 @@ class LineChart extends React.PureComponent<LineChartProps, LineChartState> {
           >
             {
               tooltipData.startData && tooltipData.startData.map((stockData, i) => (
-                <>
+                <div>
+                  {timeSeriesDataLists.length > 1 && (
+                    <TooltipMultiColorIndicator
+                      style={{ background: diagramColors[i % diagramColors.length] }}
+                    />
+                  )}
+
+                  {/* If the end data is earlier in date, show it first */}
+                  {tooltipData.endData && stockData.timestamp > tooltipData.endData[i].timestamp &&
+                    this.renderTooltipEndPrice(tooltipData.endData[i], tooltipData.config.mouseIsDown)}
+
                   <TooltipEntryContainer>
-                    {timeSeriesDataLists.length > 1 && (
-                      <TooltipMultiColorIndicator
-                        style={{ background: diagramColors[i % diagramColors.length] }}
-                      />
-                    )}
-
-                    {tooltipData.startData && !tooltipData.config.mouseIsDown && (
-                      <TooltipValueText>
-                        {`$${round(stockData.value, 2)}`}
-                      </TooltipValueText>
-                    )}
-
-                    {
-                      // When user press mouse and dragging, show end stock price (at current cursor position)
-                      tooltipData.endData && tooltipData.config.mouseIsDown && (
-                        <TooltipValueText>
-                          {`$${round(tooltipData.endData[i].value, 2)}`}
-                        </TooltipValueText>
-                      )
-                    }
+                    <TooltipValueText>
+                      {`$${round(stockData.value, 2)}`}
+                    </TooltipValueText>
                     <TooltipDateText>
                       {
                         // The data only contains precise timestamp when date range is small
@@ -362,6 +379,11 @@ class LineChart extends React.PureComponent<LineChartProps, LineChartState> {
                     </TooltipDateText>
                   </TooltipEntryContainer>
 
+                  {/* If the end data is later in date, show it after the start data */}
+                  {tooltipData.endData && stockData.timestamp < tooltipData.endData[i].timestamp &&
+                    this.renderTooltipEndPrice(tooltipData.endData[i], tooltipData.config.mouseIsDown)}
+
+                  {/* When mouse is pressed and dragging, display percentage change from start to end price */}
                   {tooltipData.endData && tooltipData.config.endColumnIndex && (
                     <TooltipPercentageChange isBad={
                       LineChart.isTooltipPriceDropping(
@@ -408,7 +430,7 @@ class LineChart extends React.PureComponent<LineChartProps, LineChartState> {
                       </div>
                     </TooltipPercentageChange>
                   )}
-                </>
+                </div>
               ))
             }
           </TooltipContainer>
