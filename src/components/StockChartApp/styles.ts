@@ -3,6 +3,7 @@ import { cssColors, cssVariables } from "../../styles/css";
 
 const StockChartApp = styled.div`
   position: relative;
+  min-width: 850px;
 `;
 
 export const Root = StockChartApp;
@@ -56,7 +57,7 @@ export const PriceChange = styled.div<{ isNegative: boolean }>`
   font-size: ${cssVariables.smallFontSize};
   font-weight: ${cssVariables.mediumFontWeight};
   line-height: 16px;
-  color: ${p=> p.isNegative ? cssColors.colorBloodRed : cssColors.colorSoftGreen};
+  color: ${p => p.isNegative ? cssColors.colorBloodRed : cssColors.colorSoftGreen};
   font-family: ${cssVariables.titleFontFamily};
   margin-right: ${cssVariables.uiUnit};
 `;
